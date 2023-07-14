@@ -6,6 +6,7 @@
 #include <elf.h>
 #include <sys/uio.h>
 #include <sys/user.h>
+#include <string>
 
 namespace minidbg
 {
@@ -47,13 +48,14 @@ enum class reg {
     cpsr
 };
 
-static constexpr std::size_t n_registers = 34;
+static constexpr std::size_t n_registers = 35;
 
 struct reg_descriptor {
     reg r;
     int dwarf_r;
     std::string name;
 };
+
 
 // have a look in /usr/include/sys/user.h for how to lay this out
 static const std::array<reg_descriptor, n_registers> g_register_descriptors{{
@@ -86,8 +88,8 @@ static const std::array<reg_descriptor, n_registers> g_register_descriptors{{
     {reg::x26, 26, "x26"},
     {reg::x27, 27, "x27"},
     {reg::x28, 28, "x28"},
-    {reg::fp, 29, "fp"},
-    {reg::lr, 30, "lr"},
+    {reg::fp, 29, "fp(x29)"},
+    {reg::lr, 30, "lr(x30)"},
     {reg::sp, 31, "sp"},
     {reg::pc, 32, "pc"},
     {reg::cpsr, 33, "cpsr"},

@@ -230,8 +230,16 @@ expr_result expr::evaluate(expr_context *ctx, const std::initializer_list<taddr>
             stack.back() = ctx->form_tls_address(stack.back());
             break;
         case DW_OP::call_frame_cfa:
-            // 涉及在x86架构上仅仅读取帧指针
+
+#if defined(__amd64__) || defined(__x86_64__)
             tmp1.u = 6;
+
+#elif defined(__aarch64__) || defined(__arm__)
+            tmp1.u = 29;
+#else
+#error "unsupport the arch"
+#endif
+           
             stack.push_back((int64_t)ctx->reg(tmp1.u));
             break;
             // 2.5.1.4 算术和逻辑操作

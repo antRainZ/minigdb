@@ -59,7 +59,7 @@ int get_breakpoint_rollback();
 
 #include "aarch64/register.hpp"
 #define PROGRAM_COUNT reg::pc
-#define FRAME_POINTER reg::fp
+#define FRAME_POINTER reg::sp
 
 #else
 #error "unsupport the arch"
