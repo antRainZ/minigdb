@@ -1,7 +1,11 @@
 cmake_minimum_required (VERSION 3.0)
 project (MiniDbg)
 
-add_compile_options(-std=c++14)
+add_compile_options(
+    "-gdwarf-4" 
+    "-O0"
+    "-std=c++14"
+)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
@@ -18,20 +22,10 @@ set_target_properties(elf PROPERTIES OUTPUT_NAME elf)
 include_directories(include)
 add_executable(minidbg src/minidbg.cpp src/linenoise.c)
 
-
+# 添加测试文件
 add_executable(hello test/hello.cpp)
-set_target_properties(hello
-                      PROPERTIES COMPILE_FLAGS "-gdwarf-4 -O0")
-
 add_executable(variable test/variable.cpp)
-set_target_properties(variable
-                      PROPERTIES COMPILE_FLAGS "-gdwarf-2 -O0")
-
 add_executable(unwinding test/stack_unwinding.cpp)
-set_target_properties(unwinding
-                      PROPERTIES COMPILE_FLAGS "-gdwarf-4 -O0")
 
 target_link_libraries(minidbg dwarf)              
 target_link_libraries(minidbg elf)
-set_target_properties(minidbg
-                      PROPERTIES COMPILE_FLAGS "-g -O0")
