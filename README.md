@@ -10,3 +10,8 @@ make -j4
 ```
 
 # 运行
+
+```sh
+cd build
+./minidbg ./variable
+```

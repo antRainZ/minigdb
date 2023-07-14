@@ -30,9 +30,7 @@ public:
     }
 
     dwarf::taddr pc() override {
-        struct user_regs_struct regs;
-        ptrace(PTRACE_GETREGS, m_pid, nullptr, &regs);
-        return regs.rip - m_load_address;
+        return get_register_value(m_pid, PROGRAM_COUNT) - m_load_address;
     }
 
     dwarf::taddr deref_size (dwarf::taddr address, unsigned size) override {
