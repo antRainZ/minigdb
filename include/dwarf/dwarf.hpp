@@ -1406,6 +1406,88 @@ class die_str_map
     std::shared_ptr<impl> m;
 };
 
+/**
+ * @brief 声明或内联实例的声明或调用坐标。
+ *
+ */
+class coordinates
+{
+  public:
+    enum class type {
+        decl,
+        call
+    };
+
+    coordinates(const die &die, type typ = type::decl) : d(die), t(typ) {}
+
+    /**
+     * @brief 用于返回包含该声明或调用的源文件的指针。如果没有指定源文件，则返回nullptr
+     *
+     * @return const line_table::file*
+     */
+    const line_table::file *get_file() const;
+
+    /**
+     * @brief 用于返回该声明或调用的第一个字符的源行号。如果没有指定源行号，则返回0
+     *
+     * @return unsigned
+     */
+    unsigned get_line() const;
+
+    /**
+     * @brief 用于返回该声明或调用的第一个字符的源列号。如果没有指定源列号，则返回0
+     *
+     * @return unsigned
+     */
+    unsigned get_column() const;
+
+    /**
+     * @brief 用于返回一个描述性字符串，格式为"filename[:line[:column]]"
+     *
+     * @return std::string
+     */
+    std::string get_description() const;
+
+  private:
+    const die &d;
+    const type t;
+};
+
+/**
+ * @brief 表示一个子程序、内联子程序或其他入口点
+ *
+ */
+class subroutine
+{
+  public:
+    subroutine(const die &die) : d(die) {}
+
+    /**
+     * @brief 用于返回该子程序的声明坐标
+     *
+     * @return coordinates
+     */
+    coordinates get_decl() const;
+
+    /**
+     * @brief 用于返回具体内联子程序的调用坐标。对于其他类型的子程序，返回的坐标部分都将是"unknown
+     *
+     * @return coordinates
+     */
+    coordinates get_call() const;
+
+    /**
+     * @brief 用于返回该子程序的名称。如果没有名称，则返回空字符串""
+     *
+     * @return std::string
+     */
+    std::string get_name() const;
+
+  private:
+    // 表示与该子程序相关联的DIE对象。
+    const die &d;
+};
+
 ///////////////////////////// ELF //////////////////////////////
 
 namespace elf

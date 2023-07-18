@@ -58,6 +58,11 @@ void cursor::skip_initial_length()
     }
 }
 
+void cursor::skip_unit_type()
+{
+    pos += sizeof(sbyte);
+}
+
 section_offset cursor::offset()
 {
     switch (sec->fmt) {

@@ -27,6 +27,7 @@ namespace minidbg {
         case symbol_type::section: return "section";
         case symbol_type::file: return "file";
         }
+        return "none";
     }
 
     struct symbol {

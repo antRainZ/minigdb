@@ -42,6 +42,35 @@ private:
     pid_t m_pid;
     uint64_t m_load_address;
 };
+
+bool find_pc(const dwarf::die &d, dwarf::taddr pc, std::vector<dwarf::die> *stack)
+{
+    using namespace dwarf;
+
+    // Scan children first to find most specific DIE
+    bool found = false;
+    for (auto &child : d) {
+        if ((found = find_pc(child, pc, stack)))
+            break;
+    }
+    switch (d.tag) {
+    case DW_TAG::subprogram:
+    case DW_TAG::inlined_subroutine:
+        try {
+            if (found || die_pc_range(d).contains(pc)) {
+                found = true;
+                stack->push_back(d);
+            }
+        } catch (std::exception &e) {
+
+        } 
+        break;
+    default:
+        break;
+    }
+    return found;
+}
+
 template class std::initializer_list<dwarf::taddr>;
 void debugger::read_variables() {
     using namespace dwarf;
@@ -262,11 +291,10 @@ void debugger::set_pc(uint64_t pc) {
 dwarf::die debugger::get_function_from_pc(uint64_t pc) {
     for (auto &cu : m_dwarf.compilation_units()) {
         if (die_pc_range(cu.root()).contains(pc)) {
-            for (const auto& die : cu.root()) {
-                if (die.tag == dwarf::DW_TAG::subprogram) {
-                    if (die_pc_range(die).contains(pc)) {
-                        return die;
-                    }
+            std::vector<dwarf::die> stack;
+            if (find_pc(cu.root(), pc, &stack)) {
+                for (auto &d : stack) {
+                    return d;
                 }
             }
         }

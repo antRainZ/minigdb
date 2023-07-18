@@ -237,6 +237,13 @@ struct cursor {
      * 
      */
     void skip_initial_length();
+
+    /**
+     * @brief 跳过单元类型
+     * 
+     */
+    void skip_unit_type();
+
     /**
      * @brief 根据给定的DW_FORM跳过相应的字段。
      * 根据字段的类型和当前节的格式，分别跳过不同大小的字段
