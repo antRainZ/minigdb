@@ -2,6 +2,11 @@
 主要是对 [A mini x86 linux debugger for teaching purposes Topics](https://github.com/TartanLlama/minidbg) 进行修改
 支持 x86_64 和 aarch 64 架构
 
+```sh
+# gcc11 生成 dwarf4 内容不一致
+gcc version 9.5.0 (Ubuntu 9.5.0-1ubuntu1~22.04)
+```
+
 # 编译
 ```sh
 rm -rf build && mkdir -p build && cd build 
@@ -14,6 +19,7 @@ make -j4
 ```sh
 cd build
 ./bin/minidbg ./bin/test/variable
+./bin/minidbg ./bin/test/unwinding
 ```
 
 # 工具
