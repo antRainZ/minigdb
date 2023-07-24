@@ -71,11 +71,51 @@ bool find_pc(const dwarf::die &d, dwarf::taddr pc, std::vector<dwarf::die> *stac
     return found;
 }
 
+/**
+ * @brief 获取对应的比特位
+ * 
+ * @param val 
+ * @param start 
+ * @param end 
+ * @return unsigned int 
+ */
+unsigned int select_bits (unsigned int val, unsigned int start, unsigned int end)
+{
+    unsigned int size = (end - start) + 1;
+    unsigned int mask = ((1 << size) - 1) << start;
+    return (val & mask) >> start;
+}
+
+/**
+ * @brief 
+ * 
+ * @param bits 
+ * @param numbits 
+ * @return unsigned int 
+ */
+unsigned int arm64_sign_extend (unsigned int bits, int numbits)
+{
+    if(bits & (1 << (numbits - 1)))
+        return bits | ~((1 << numbits) - 1);
+    return bits;
+}
+
+int get_offset(uint32_t opcode) {
+    unsigned imm7 = select_bits (opcode, 15, 21);
+    unsigned opc = select_bits (opcode, 30, 31);
+    unsigned int scale = 2 + (opc >> 1);
+    unsigned int imm = arm64_sign_extend (imm7, 7) << scale;
+    return (int)imm;
+}
+
 template class std::initializer_list<dwarf::taddr>;
 void debugger::read_variables() {
     using namespace dwarf;
 
     auto func = get_function_from_pc(get_offset_pc());
+    std::vector<Variable> farg; // 函数参数
+    std::vector<Variable> larg; // 函数局部变量
+
 
     for (const auto& die : func) {
         if (die.tag == DW_TAG::variable || die.tag == DW_TAG::formal_parameter) {
@@ -89,9 +129,10 @@ void debugger::read_variables() {
                 switch (result.location_type) {
                 case expr_result::type::address:
                 {
-                    auto offset_addr = result.value;
-                    auto value = read_memory(offset_addr);
-                    std::cout << at_name(die) << " (0x" << std::hex << offset_addr << ") = " << value << std::endl;
+                    if (die.tag == DW_TAG::variable) 
+                        larg.emplace_back(at_name(die), result.value);
+                    else 
+                        farg.emplace_back(at_name(die), result.value);
                     break;
                 }
 
@@ -110,6 +151,29 @@ void debugger::read_variables() {
                 throw std::runtime_error{"Unhandled variable location"};
             }
         }
+    }
+#if defined(__aarch64__) || defined(__arm64__)
+
+    uint64_t res = read_memory(get_register_value(m_pid, FRAME_POINTER)-farg.size()*4-8);
+    uint32_t code = res&(0xffffffff);
+    int offset = get_offset(code);
+    for(auto &v:farg) {
+        v.addr = v.addr-offset;
+    }
+    for(auto &v:larg) {
+        v.addr = v.addr-offset;
+    }
+
+#endif
+    std::cout << "function argument:" << std::endl;
+    for(auto &v:farg) {
+        auto value = read_memory(v.addr);
+        std::cout << v.name << " (0x" << std::hex << v.addr << ") = " << value << std::endl;
+    }
+    std::cout << "function localtion variable:" << std::endl;
+    for(auto &v:larg) {
+        auto value = read_memory(v.addr);
+        std::cout << v.name << " (0x" << std::hex << v.addr << ") = " << value << std::endl;
     }
 }
 

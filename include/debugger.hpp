@@ -36,6 +36,12 @@ namespace minidbg {
         std::uintptr_t addr;
     };
 
+    struct Variable {
+        std::string name; // 变量名
+        uint64_t addr;    // 地址
+        Variable(std::string name, uint64_t addr) : name(name), addr(addr) {}
+    };
+
     class debugger {
     public:
         debugger (std::string prog_name, pid_t pid)

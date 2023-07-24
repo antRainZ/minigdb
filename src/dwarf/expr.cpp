@@ -142,14 +142,7 @@ expr_result expr::evaluate(expr_context *ctx, const std::initializer_list<taddr>
                     case expr_result::type::address:
                         tmp1.u = frame_base.value;
                         tmp2.s = cur.sleb128();
-#if defined(__amd64__) || defined(__x86_64__)
-            stack.push_back(tmp1.u + tmp2.s);
-#elif defined(__aarch64__) || defined(__arm__)
-            stack.push_back(tmp1.u - tmp2.s);
-#else
-#error "unsupport the arch"
-#endif
-                        
+                        stack.push_back(tmp1.u + tmp2.s);          
                         found = true;
                         break;
                     case expr_result::type::literal:
